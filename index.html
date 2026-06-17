@@ -3,65 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Baca Meter PDAM v3.0</title>
+    <title>Aplikasi Baca Meter PDAM v4.0</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --bg-primary: #2d132c; --bg-secondary: #1f0b1e; --header-color: #2b61b2; --text-yellow: #f1c40f; --text-white: #ffffff; --text-muted: #aaaaaa; --border-color: #4a2648; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-primary); color: var(--text-white); margin: 0; padding-bottom: 70px; }
-        .header { background-color: var(--header-color); padding: 15px; text-align: center; font-size: 18px; font-weight: bold; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        :root { 
+            --bg-primary: #f4f6f9; 
+            --bg-secondary: #ffffff; 
+            --header-color: #0056b3; 
+            --text-main: #212529; 
+            --text-muted: #6c757d; 
+            --accent-yellow: #ffc107;
+            --border-color: #dee2e6; 
+        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-primary); color: var(--text-main); margin: 0; padding-bottom: 70px; }
+        .header { background-color: var(--header-color); color: white; padding: 15px; text-align: center; font-size: 18px; font-weight: bold; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         
         /* --- UTALITAS SORT & FILTER --- */
-        .search-container { padding: 10px 15px; background-color: var(--bg-secondary); display: flex; flex-direction: column; gap: 8px; }
-        .search-box { width: 100%; padding: 10px; border-radius: 8px; border: none; box-sizing: border-box; font-size: 15px; background: #fff; color: #000; }
+        .search-container { padding: 12px 15px; background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; }
+        .search-box { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); box-sizing: border-box; font-size: 15px; background: #fff; color: #000; }
         .control-row { display: flex; gap: 8px; }
-        .select-control { flex: 1; padding: 8px; border-radius: 6px; background: var(--bg-primary); color: white; border: 1px solid var(--border-color); font-size: 13px; }
+        .select-control { flex: 1; padding: 10px; border-radius: 6px; background: var(--bg-secondary); color: var(--text-main); border: 1px solid var(--border-color); font-size: 13px; }
         
         .page { display: none; padding: 15px; }
         .page.active { display: block; }
         
         /* --- LIST PELANGGAN --- */
-        .pelanggan-item { border-bottom: 1px solid var(--border-color); padding: 14px 5px; cursor: pointer; }
-        .pelanggan-title { color: var(--text-yellow); font-weight: bold; font-size: 15px; margin-bottom: 4px; }
-        .pelanggan-meta { font-size: 12px; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 10px; }
+        .pelanggan-item { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; margin-bottom: 10px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .pelanggan-title { color: var(--header-color); font-weight: bold; font-size: 16px; margin-bottom: 4px; }
+        .pelanggan-meta { font-size: 13px; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
         
-        .badge-status { float: right; padding: 3px 7px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        .belum { background-color: #e74c3c; color: white; }
-        .sudah_kirim { background-color: #f39c12; color: white; }
-        .sudah_dibaca { background-color: #2ecc71; color: white; }
+        .badge-status { float: right; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .belum { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .sudah_kirim { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .sudah_dibaca { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
 
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-size: 14px; color: var(--text-yellow); font-weight: bold; }
-        input[type="text"], input[type="number"], input[type="file"], select { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--bg-secondary); color: white; box-sizing: border-box; }
+        .form-group { margin-bottom: 15px; position: relative; }
+        label { display: block; margin-bottom: 6px; font-size: 14px; color: var(--text-main); font-weight: bold; }
+        input[type="text"], input[type="number"], input[type="file"], select { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; background-color: #ffffff; color: #000000; box-sizing: border-box; font-size: 15px; }
         
-        .btn-submit { width: 100%; color: white; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
-        .btn-green { background-color: #25d366; }
-        .btn-blue { background-color: #3498db; }
-        .btn-red { background-color: #e74c3c; }
-        .btn-gray { background-color: #7f8c8d; }
-        .btn-submit:disabled { background-color: #555; cursor: not-allowed; }
+        /* Dropdown Hasil Cari Manual */
+        .search-results-box { position: absolute; width: 100%; background: white; border: 1px solid var(--border-color); z-index: 500; max-height: 200px; overflow-y: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 0 0 6px 6px; display: none; }
+        .search-res-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 14px; color: #000; }
+        .search-res-item:hover { background: #f0f4f8; }
+
+        .btn-submit { width: 100%; color: white; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-green { background-color: #28a745; }
+        .btn-green:hover { background-color: #218838; }
+        .btn-blue { background-color: #007bff; }
+        .btn-red { background-color: #dc3545; }
         
-        .preview-box { text-align: center; margin: 15px 0; background-color: var(--bg-secondary); padding: 10px; border-radius: 6px; border: 1px dashed var(--border-color); }
+        .info-card { background-color: #e9ecef; padding: 15px; border-radius: 8px; border-left: 5px solid var(--header-color); margin-bottom: 20px; color: var(--text-main); }
+        .preview-box { text-align: center; margin: 15px 0; background-color: #e9ecef; padding: 10px; border-radius: 6px; border: 1px dashed var(--border-color); }
         #preview-img { max-width: 100%; max-height: 220px; border-radius: 6px; display: none; }
         
-        /* --- MODAL DETAIL --- */
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .modal-content { background: var(--bg-primary); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); margin-top: 10px; }
-        .modal-foto { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin: 10px 0; cursor: pointer; border: 1px solid var(--text-yellow); }
+        /* --- MODAL DETAIL TEMA TERANG + X CLOSE --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .modal-content { background: #ffffff; padding: 20px; border-radius: 12px; position: relative; margin: 20px auto; max-width: 500px; color: #000; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .close-modal-btn { position: absolute; top: 12px; right: 15px; font-size: 28px; font-weight: bold; color: #aaa; cursor: pointer; border: none; background: none; line-height: 1; }
+        .close-modal-btn:hover { color: #000; }
+        
+        .modal-foto { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin: 10px 0; cursor: pointer; border: 2px solid var(--header-color); }
         .modal-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
 
-        #zoom-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:2000; justify-content:center; align-items:center; }
-        #zoom-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        #zoom-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:2000; justify-content:center; align-items:center; }
+        #zoom-img { max-width: 95%; max-height: 95%; object-fit: contain; }
         
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background-color: var(--bg-secondary); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border-color); z-index: 90; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background-color: #ffffff; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border-color); z-index: 90; box-shadow: 0 -2px 5px rgba(0,0,0,0.05); }
         .nav-item { text-align: center; color: var(--text-muted); font-size: 11px; cursor: pointer; flex: 1; padding: 5px 0; }
         .nav-item span { display: block; font-size: 24px; margin-bottom: 2px; }
-        .nav-item.active { color: var(--text-yellow); }
+        .nav-item.active { color: var(--header-color); font-weight: bold; }
         
-        .filter-tab { display: flex; margin-bottom: 15px; }
-        .filter-btn { flex: 1; padding: 12px; background-color: var(--bg-secondary); border: 1px solid var(--border-color); color: white; text-align: center; cursor: pointer; font-weight: bold; font-size: 12px; }
-        .filter-btn.active { background-color: var(--header-color); }
-        #loading-text { text-align: center; color: var(--text-yellow); margin-top: 20px; }
+        .filter-tab { display: flex; margin-bottom: 15px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); }
+        .filter-btn { flex: 1; padding: 12px; background-color: #ffffff; color: var(--text-main); text-align: center; cursor: pointer; font-weight: bold; font-size: 12px; border-right: 1px solid var(--border-color); }
+        .filter-btn:last-child { border-right: none; }
+        .filter-btn.active { background-color: var(--header-color); color: white; }
+        #loading-text { text-align: center; color: var(--header-color); font-weight: bold; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -70,7 +87,7 @@
 
     <div id="page-daftar" class="page active">
         <div class="search-container">
-            <input type="text" id="search-input" class="search-box" placeholder="🔍 Cari Nama, ID Pelanggan, atau Alamat..." oninput="jalankanSortDanFilter()">
+            <input type="text" id="search-input" class="search-box" placeholder="🔍 Cari Nama, ID, atau Alamat..." onkeyup="jalankanSortDanFilter()">
             <div class="control-row">
                 <select id="sort-select" class="select-control" onchange="jalankanSortDanFilter()">
                     <option value="nama">Urut: Nama (A-Z)</option>
@@ -118,15 +135,15 @@
     <div id="page-catatan" class="page">
         <div class="form-group">
             <label>Pilih Pelanggan (Ketik Nama / ID / Alamat)</label>
-            <input type="text" id="pilih-pelanggan-input" list="data-pelanggan-list" placeholder="Ketik untuk mencari..." onchange="pilihPelangganDariDropdown(this.value)">
-            <datalist id="data-pelanggan-list"></datalist>
+            <input type="text" id="pilih-pelanggan-input" placeholder="🔍 Masukkan kata kunci pencarian..." onkeyup="bantuCariHalamanFoto(this.value)">
+            <div id="box-hasil-foto" class="search-results-box"></div>
         </div>
 
         <div class="info-card" id="info-pilihan-card" style="display: none; margin-top: 10px;">
-            <p style="margin: 3px 0; font-weight: bold; color: var(--text-yellow);" id="f-nama">-</p>
-            <p style="margin: 3px 0; font-size: 13px;" id="f-id">ID: -</p>
-            <p style="margin: 3px 0; font-size: 13px;" id="f-alamat">Alamat: -</p>
-            <p style="margin: 3px 0; font-size: 13px;" id="f-st1">Stan Lalu (ST1): -</p>
+            <p style="margin: 3px 0; font-weight: bold; color: var(--header-color); font-size:16px;" id="f-nama">-</p>
+            <p style="margin: 3px 0;" id="f-id">ID: -</p>
+            <p style="margin: 3px 0;" id="f-alamat">Alamat: -</p>
+            <p style="margin: 3px 0; font-weight: bold; color: #28a745;" id="f-st1">Stan Lalu (ST1): -</p>
         </div>
 
         <div class="form-group" style="margin-top: 15px;">
@@ -134,12 +151,12 @@
             <input type="file" id="foto-input" accept="image/*" onchange="prosesKonversiWebP(event)">
         </div>
         <div class="preview-box">
-            <p style="font-size: 12px; color: var(--text-yellow); margin: 0 0 5px 0;" id="webp-info"></p>
+            <p style="font-size: 13px; color: var(--header-color); font-weight: bold; margin: 0 0 5px 0;" id="webp-info"></p>
             <img id="preview-img" src="" alt="Preview">
         </div>
         <div class="form-group">
             <label>2. Input Stan Sekarang (ST2)</label>
-            <input type="number" id="st2-input" placeholder="Boleh diisi angka 0 atau lebih kecil...">
+            <input type="number" id="st2-input" placeholder="Isi angka meteran baru...">
         </div>
         
         <button class="btn-submit btn-green" id="btn-simpan-stan" onclick="simpanKeSupabase()">Simpan Data</button>
@@ -147,8 +164,10 @@
 
     <div id="detail-modal" class="modal">
         <div class="modal-content">
-            <h3 style="margin-top:0; color: var(--text-yellow);" id="m-nama">-</h3>
-            <hr style="border: 0; border-top: 1px solid var(--border-color);">
+            <button class="close-modal-btn" onclick="tutupModal()">&times;</button>
+            
+            <h3 style="margin-top:5px; color: var(--header-color); padding-right: 25px;" id="m-nama">-</h3>
+            <hr style="border: 0; border-top: 1px solid var(--border-color); margin-bottom:12px;">
             <p id="m-id">ID Pelanggan: -</p>
             <p id="m-alamat">Alamat: -</p>
             <p id="m-kode">Kode Baca: -</p>
@@ -162,7 +181,6 @@
             <div class="modal-buttons">
                 <button class="btn-submit btn-blue" onclick="setStatusTuntas()">Set Tuntas</button>
                 <button class="btn-submit btn-red" onclick="hapusPelangganAktif()">Hapus Pelanggan</button>
-                <button class="btn-submit btn-gray" onclick="tutupModal()">Keluar</button>
             </div>
         </div>
     </div>
@@ -195,25 +213,42 @@
             document.getElementById('loading-text').style.display = 'none';
             if (error) { alert('Gagal memuat data: ' + error.message); return; }
             semuaPelanggan = data;
-            
-            isiDataListDropdown();
             jalankanSortDanFilter();
         }
 
-        function isiDataListDropdown() {
-            const dl = document.getElementById('data-pelanggan-list');
-            dl.innerHTML = '';
-            semuaPelanggan.forEach(p => {
-                dl.innerHTML += `<option value="${p.id_pelanggan} - ${p.nama} [${p.alamat || ''}]"></option>`;
-            });
+        // 🔍 FIX UTAMA: Fungsi pencarian realtime di halaman Foto WA
+        function bantuCariHalamanFoto(keyword) {
+            const boxHasil = document.getElementById('box-hasil-foto');
+            keyword = keyword.toLowerCase().trim();
+            
+            if(keyword === '') { boxHasil.style.display = 'none'; return; }
+
+            const cocok = semuaPelanggan.filter(p => 
+                p.nama.toLowerCase().includes(keyword) || 
+                p.id_pelanggan.includes(keyword) || 
+                (p.alamat && p.alamat.toLowerCase().includes(keyword))
+            ).slice(0, 8); // Batasi maksimal tampil 8 rekomendasi biar rapi
+
+            if(cocok.length === 0) {
+                boxHasil.innerHTML = `<div class="search-res-item" style="color:gray;">Data tidak ditemukan, bro</div>`;
+            } else {
+                boxHasil.innerHTML = '';
+                cocok.forEach(p => {
+                    boxHasil.innerHTML += `
+                        <div class="search-res-item" onclick="pilihPelangganLangsung('${p.id_pelanggan}')">
+                            <b>${p.nama}</b> (${p.id_pelanggan}) <br>
+                            <small style="color:gray;">${p.alamat || ''}</small>
+                        </div>`;
+                });
+            }
+            boxHasil.style.display = 'block';
         }
 
-        function pilihPelangganDariDropdown(val) {
-            if(!val) return;
-            const idData = val.split(' - ')[0].trim();
-            const p = semuaPelanggan.find(item => item.id_pelanggan == idData);
+        function pilihPelangganLangsung(idPelanggan) {
+            const p = semuaPelanggan.find(item => item.id_pelanggan == idPelanggan);
             if(p) {
                 pelangganAktif = p;
+                document.getElementById('pilih-pelanggan-input').value = `${p.id_pelanggan} - ${p.nama}`;
                 document.getElementById('f-nama').innerText = p.nama;
                 document.getElementById('f-id').innerText = "ID: " + p.id_pelanggan;
                 document.getElementById('f-alamat').innerText = "Alamat: " + (p.alamat || '-');
@@ -221,9 +256,10 @@
                 document.getElementById('st2-input').value = p.st2 !== null && p.st2 !== undefined ? p.st2 : '';
                 document.getElementById('info-pilihan-card').style.display = 'block';
             }
+            document.getElementById('box-hasil-foto').style.display = 'none';
         }
 
-        // 🌟 UPGRADE: Pencarian mencakup Nama, ID, dan Alamat sekaligus
+        // 🔍 FIX UTAMA: Fungsi pencarian di halaman daftar utama (onkeyup aktif)
         function jalankanSortDanFilter() {
             let dataHasil = [...semuaPelanggan];
             const keyword = document.getElementById('search-input').value.toLowerCase().trim();
@@ -263,7 +299,8 @@
                 container.innerHTML += `
                     <div class="pelanggan-item" onclick='bukaModalDetail(${JSON.stringify(p)})'>
                         <span class="badge-status ${stat}">${lbl}</span>
-                        <div class="pelanggan-title">${p.nama} [ ${p.alamat || ''} ]</div>
+                        <div class="pelanggan-title">${p.nama}</div>
+                        <div style="font-size:13px; color:#495057;">📍 ${p.alamat || '-'}</div>
                         <div class="pelanggan-meta">
                             <span><b>ID:</b> ${p.id_pelanggan}</span> <span><b>KODE:</b> ${p.kode_baca || 'DADA'}</span> <span><b>ST1:</b> ${p.st1}</span> <span><b>ST2:</b> ${p.st2 !== null && p.st2 !== undefined ? p.st2 : '--'}</span>
                         </div>
@@ -287,7 +324,11 @@
             if(terfilter.length === 0) { container.innerHTML = '<p style="text-align:center;color:gray;padding:20px;">Kosong di bagian ini, bro!</p>'; return; }
 
             terfilter.forEach(p => {
-                container.innerHTML += ` <div class="pelanggan-item" onclick='bukaModalDetail(${JSON.stringify(p)})'> <div class="pelanggan-title">${p.nama}</div> <div class="pelanggan-meta"><span><b>ID:</b> ${p.id_pelanggan}</span> <span><b>Alamat:</b> ${p.alamat}</span></div> </div>`;
+                container.innerHTML += ` 
+                    <div class="pelanggan-item" onclick='bukaModalDetail(${JSON.stringify(p)})'> 
+                        <div class="pelanggan-title">${p.nama}</div> 
+                        <div class="pelanggan-meta"><span><b>ID:</b> ${p.id_pelanggan}</span> <span><b>Alamat:</b> ${p.alamat || '-'}</span></div> 
+                    </div>`;
             });
         }
 
@@ -363,27 +404,23 @@
             reader.readAsDataURL(file);
         }
 
-        // 🌟 UPGRADE: Mengizinkan Stan 0, Stan Mundur, Pemakaian 0 & Minus tanpa blokir validasi
         async function simpanKeSupabase() {
             if(!pelangganAktif) { alert('Pilih pelanggannya dulu, bro!'); return; }
             
             const st2InputRaw = document.getElementById('st2-input').value;
-            if (st2InputRaw === '') { alert('Kolom Stan Sekarang (ST2) harus diisi angka, minimal 0 bro!'); return; }
+            if (st2InputRaw === '') { alert('Kolom Stan Sekarang (ST2) harus diisi angka!'); return; }
             
             const st2 = parseInt(st2InputRaw);
-            if (isNaN(st2)) { alert('Input stan harus berupa angka murni!'); return; }
             if (!fileBlobWebP) { alert('Foto meteran wajib di-upload!'); return; }
 
             const btn = document.getElementById('btn-simpan-stan');
-            btn.disabled = true; btn.innerText = "Mengompres & Menyimpan...";
+            btn.disabled = true; btn.innerText = "Menyimpan data...";
 
             const namaFoto = `${pelangganAktif.id_pelanggan}_${Date.now()}.webp`;
             let { error: storageError } = await _supabase.storage.from('foto-pdam').upload(namaFoto, fileBlobWebP, { contentType: 'image/webp' });
             if (storageError) { alert('Gagal: ' + storageError.message); btn.disabled = false; btn.innerText = "Simpan Data"; return; }
             
             const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/foto-pdam/${namaFoto}`;
-            
-            // Rumus fleksibel: pemakaian dihitung apa adanya tanpa dibatasi harus bernilai positif
             const pemakaian = st2 - pelangganAktif.st1; 
 
             let { error: dbError } = await _supabase.from('pelanggan')
@@ -393,7 +430,7 @@
             btn.disabled = false; btn.innerText = "Simpan Data";
             if (dbError) { alert(dbError.message); } 
             else { 
-                alert(`✅ Sukses disimpan dengan status WA Masuk.\nRumus hitung: ${st2} - ${pelangganAktif.st1} = ${pemakaian} m³`);
+                alert(`✅ Sukses disimpan (WA Masuk).`);
                 document.getElementById('pilih-pelanggan-input').value = '';
                 document.getElementById('info-pilihan-card').style.display = 'none';
                 pelangganAktif = null;
@@ -405,14 +442,13 @@
         async function resetMulaiBulanBaru() {
             let konfirmasi1 = confirm("⚠️ PERINGATAN KERAS!\nApakah kamu mau mereset data untuk periode bulan baru?");
             if(!konfirmasi1) return;
-            let konfirmasi2 = confirm("Data foto lama di database akan dibersihkan, dan Stan Sekarang (ST2) saat ini akan dijadikan dasar Stan Lalu (ST1) untuk bulan depan. Lanjutkan, bro?");
+            let konfirmasi2 = confirm("Data foto lama di database akan dibersihkan, dan Stan Sekarang (ST2) saat ini akan dijadikan dasar Stan Lalu (ST1) untuk bulan depan. Lanjutkan?");
             if(!konfirmasi2) return;
 
             document.getElementById('loading-text').innerText = "Sedang memproses reset massal...";
             document.getElementById('loading-text').style.display = 'block';
 
             for(let p of semuaPelanggan) {
-                // Modifikasi aturan reset bulanan agar fleksibel mengikuti hasil akhir pembacaan riil lapangan
                 let stanLaluBaru = p.st2 !== null && p.st2 !== undefined ? p.st2 : p.st1; 
                 await _supabase.from('pelanggan')
                     .update({ st1: stanLaluBaru, st2: null, pmk1: null, foto_url: null, status_kerja: 'belum' })
@@ -442,9 +478,12 @@
             document.getElementById('page-' + pageId).classList.add('active');
             element.classList.add('active');
             if(pageId !== 'daftar') { document.getElementById('app-title').innerText = pageTitle; } else { document.getElementById('app-title').innerText = `Data Pelanggan (${semuaPelanggan.length})`; }
+            // Sembunyikan pop-up cari foto kalau pindah page
+            document.getElementById('box-hasil-foto').style.display = 'none';
         }
 
         muatData();
     </script>
 </body>
 </html>
+
