@@ -108,6 +108,30 @@
 
     <div id="page-kirim" class="page">
         <button class="btn-submit btn-red" style="margin-bottom: 15px; padding: 10px;" onclick="resetMulaiBulanBaru()">🔄 RESET DATA BULANAN</button>
+        
+  <div class="search-container">
+    <input type="text"
+           id="search-progres"
+           class="search-box"
+           placeholder="🔍 Cari Nama, ID, atau Alamat..."
+           onkeyup="renderProgresList()">
+
+    <div class="control-row">
+        <select id="sort-progres" class="select-control" onchange="renderProgresList()">
+            <option value="nama">Urut: Nama (A-Z)</option>
+            <option value="id_pelanggan">Urut: ID Pelanggan</option>
+            <option value="kode_baca">Urut: Kode Baca</option>
+        </select>
+
+        <select id="filter-kode-progres" class="select-control" onchange="renderProgresList()">
+            <option value="semua">Semua Kode</option>
+            <option value="DADA">DADA</option>
+            <option value="DADB">DADB</option>
+            <option value="DADC">DADC</option>
+        </select>
+    </div>
+</div>      
+        
         <div class="filter-tab">
             <div class="filter-btn active" id="btn-fil-belum" onclick="setFilterKerja('belum')">Belum Lapor</div>
             <div class="filter-btn" id="btn-fil-sudah" onclick="setFilterKerja('sudah_kirim')">WA Masuk</div>
@@ -223,11 +247,11 @@
             
             if(keyword === '') { boxHasil.style.display = 'none'; return; }
 
-            const cocok = semuaPelanggan.filter(p => 
-                p.nama.toLowerCase().includes(keyword) || 
-                p.id_pelanggan.includes(keyword) || 
-                (p.alamat && p.alamat.toLowerCase().includes(keyword))
-            ).slice(0, 8); // Batasi maksimal tampil 8 rekomendasi biar rapi
+            const cocok = semuaPelanggan.filter(p =>
+    (p.nama || '').toLowerCase().includes(keyword) ||
+    (p.id_pelanggan || '').toString().includes(keyword) ||
+    (p.alamat || '').toLowerCase().includes(keyword)
+).slice(0,8); // Batasi maksimal tampil 8 rekomendasi biar rapi
 
             if(cocok.length === 0) {
                 boxHasil.innerHTML = `<div class="search-res-item" style="color:gray;">Data tidak ditemukan, bro</div>`;
@@ -265,11 +289,11 @@
             const keyword = document.getElementById('search-input').value.toLowerCase().trim();
             
             if(keyword !== '') {
-                dataHasil = dataHasil.filter(p => 
-                    p.nama.toLowerCase().includes(keyword) || 
-                    p.id_pelanggan.includes(keyword) || 
-                    (p.alamat && p.alamat.toLowerCase().includes(keyword))
-                );
+                dataHasil = dataHasil.filter(p =>
+    (p.nama || '').toLowerCase().includes(keyword) ||
+    (p.id_pelanggan || '').toString().includes(keyword) ||
+    (p.alamat || '').toLowerCase().includes(keyword)
+);
             }
 
             const kodeFilter = document.getElementById('filter-kode-select').value;
@@ -320,7 +344,50 @@
             document.getElementById('btn-fil-sudah').innerText = `WA Masuk (${countKirim})`;
             document.getElementById('btn-fil-tuntas').innerText = `Set Tuntas (${countDibaca})`;
 
-            const terfilter = semuaPelanggan.filter(p => (p.status_kerja || 'belum') === filterKerjaStatus);
+            let terfilter = semuaPelanggan.filter(p => (p.status_kerja || 'belum') === filterKerjaStatus);
+            // SEARCH
+const keyword = document.getElementById('search-progres').value
+    .toLowerCase()
+    .trim();
+
+if (keyword !== '') {
+    terfilter = terfilter.filter(p =>
+        (p.nama || '').toLowerCase().includes(keyword) ||
+        (p.id_pelanggan || '').toString().includes(keyword) ||
+        (p.alamat || '').toLowerCase().includes(keyword)
+    );
+}
+
+// FILTER KODE
+const kode = document.getElementById('filter-kode-progres').value;
+
+if (kode !== 'semua') {
+    terfilter = terfilter.filter(
+        p => (p.kode_baca || '') === kode
+    );
+}
+
+// SORT
+const jenisSort = document.getElementById('sort-progres').value;
+
+terfilter.sort((a, b) => {
+
+    if (jenisSort === 'nama') {
+        return (a.nama || '').localeCompare(b.nama || '');
+    }
+
+    if (jenisSort === 'id_pelanggan') {
+        return String(a.id_pelanggan || '')
+            .localeCompare(String(b.id_pelanggan || ''));
+    }
+
+    if (jenisSort === 'kode_baca') {
+        return (a.kode_baca || '')
+            .localeCompare(b.kode_baca || '');
+    }
+
+    return 0;
+});
             if(terfilter.length === 0) { container.innerHTML = '<p style="text-align:center;color:gray;padding:20px;">Kosong di bagian ini, bro!</p>'; return; }
 
             terfilter.forEach(p => {
@@ -486,4 +553,3 @@
     </script>
 </body>
 </html>
-
