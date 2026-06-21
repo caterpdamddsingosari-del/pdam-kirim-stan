@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Baca Meter PDAM v4.0</title>
+    <title>Aplikasi Baca Meter PDAM v4.5</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -40,7 +40,8 @@
 
         .form-group { margin-bottom: 15px; position: relative; }
         label { display: block; margin-bottom: 6px; font-size: 14px; color: var(--text-main); font-weight: bold; }
-        input[type="text"], input[type="number"], input[type="file"], select { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; background-color: #ffffff; color: #000000; box-sizing: border-box; font-size: 15px; }
+        input[type="text"], input[type="number"], input[type="file"], select, textarea { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; background-color: #ffffff; color: #000000; box-sizing: border-box; font-size: 15px; }
+        textarea { resize: vertical; font-family: inherit; }
         
         /* Dropdown Hasil Cari Manual */
         .search-results-box { position: absolute; width: 100%; background: white; border: 1px solid var(--border-color); z-index: 500; max-height: 200px; overflow-y: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 0 0 6px 6px; display: none; }
@@ -51,6 +52,7 @@
         .btn-green { background-color: #28a745; }
         .btn-green:hover { background-color: #218838; }
         .btn-blue { background-color: #007bff; }
+        .btn-orange { background-color: #fd7e14; }
         .btn-red { background-color: #dc3545; }
         
         .info-card { background-color: #e9ecef; padding: 15px; border-radius: 8px; border-left: 5px solid var(--header-color); margin-bottom: 20px; color: var(--text-main); }
@@ -65,6 +67,7 @@
         
         .modal-foto { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin: 10px 0; cursor: pointer; border: 2px solid var(--header-color); }
         .modal-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
+        .wa-link { color: #25d366; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
 
         #zoom-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:2000; justify-content:center; align-items:center; }
         #zoom-img { max-width: 95%; max-height: 95%; object-fit: contain; }
@@ -79,6 +82,9 @@
         .filter-btn:last-child { border-right: none; }
         .filter-btn.active { background-color: var(--header-color); color: white; }
         #loading-text { text-align: center; color: var(--header-color); font-weight: bold; margin-top: 20px; }
+        
+        /* Edit Section Style inside Modal */
+        #modal-edit-section { display: none; margin-top: 15px; padding-top: 15px; border-top: 2px dashed var(--border-color); }
     </style>
 </head>
 <body>
@@ -87,7 +93,7 @@
 
     <div id="page-daftar" class="page active">
         <div class="search-container">
-            <input type="text" id="search-input" class="search-box" placeholder="🔍 Cari Nama, ID, atau Alamat..." onkeyup="jalankanSortDanFilter()">
+            <input type="text" id="search-input" class="search-box" placeholder="🔍 Cari Nama, ID, Alamat, Catatan, HP..." onkeyup="jalankanSortDanFilter()">
             <div class="control-row">
                 <select id="sort-select" class="select-control" onchange="jalankanSortDanFilter()">
                     <option value="nama">Urut: Nama (A-Z)</option>
@@ -95,10 +101,26 @@
                     <option value="kode_baca">Urut: Kode Baca</option>
                 </select>
                 <select id="filter-kode-select" class="select-control" onchange="jalankanSortDanFilter()">
-                    <option value="semua">Semua Kode Baca</option>
-                    <option value="DADA">Kode: DADA</option>
-                    <option value="DADB">Kode: DADB</option>
-                    <option value="DADC">Kode: DADC</option>
+                    <option value="semua">Semua Kode</option>
+                    <option value="DADA">DADA</option>
+                    <option value="DADB">DADB</option>
+                    <option value="DADC">DADC</option>
+                    <option value="DADD">DADD</option>
+                    <option value="DADF">DADF</option>
+                    <option value="DADG">DADG</option>
+                    <option value="DADH">DADH</option>
+                    <option value="DADI">DADI</option>
+                    <option value="DADJ">DADJ</option>
+                    <option value="DADK">DADK</option>
+                    <option value="DADL">DADL</option>
+                    <option value="DADM">DADM</option>
+                    <option value="DADN">DADN</option>
+                    <option value="DADO">DADO</option>
+                    <option value="DADP">DADP</option>
+                    <option value="DADQ">DADQ</option>
+                    <option value="DADR">DADR</option>
+                    <option value="DADS">DADS</option>
+                    <option value="DADZ">DADZ</option>
                 </select>
             </div>
         </div>
@@ -109,28 +131,38 @@
     <div id="page-kirim" class="page">
         <button class="btn-submit btn-red" style="margin-bottom: 15px; padding: 10px;" onclick="resetMulaiBulanBaru()">🔄 RESET DATA BULANAN</button>
         
-  <div class="search-container">
-    <input type="text"
-           id="search-progres"
-           class="search-box"
-           placeholder="🔍 Cari Nama, ID, atau Alamat..."
-           onkeyup="renderProgresList()">
-
-    <div class="control-row">
-        <select id="sort-progres" class="select-control" onchange="renderProgresList()">
-            <option value="nama">Urut: Nama (A-Z)</option>
-            <option value="id_pelanggan">Urut: ID Pelanggan</option>
-            <option value="kode_baca">Urut: Kode Baca</option>
-        </select>
-
-        <select id="filter-kode-progres" class="select-control" onchange="renderProgresList()">
-            <option value="semua">Semua Kode</option>
-            <option value="DADA">DADA</option>
-            <option value="DADB">DADB</option>
-            <option value="DADC">DADC</option>
-        </select>
-    </div>
-</div>      
+        <div class="search-container">
+            <input type="text" id="search-progres" class="search-box" placeholder="🔍 Cari Nama, ID, atau Alamat..." onkeyup="renderProgresList()">
+            <div class="control-row">
+                <select id="sort-progres" class="select-control" onchange="renderProgresList()">
+                    <option value="nama">Urut: Nama (A-Z)</option>
+                    <option value="id_pelanggan">Urut: ID Pelanggan</option>
+                    <option value="kode_baca">Urut: Kode Baca</option>
+                </select>
+                <select id="filter-kode-progres" class="select-control" onchange="renderProgresList()">
+                    <option value="semua">Semua Kode</option>
+                    <option value="DADA">DADA</option>
+                    <option value="DADB">DADB</option>
+                    <option value="DADC">DADC</option>
+                    <option value="DADD">DADD</option>
+                    <option value="DADF">DADF</option>
+                    <option value="DADG">DADG</option>
+                    <option value="DADH">DADH</option>
+                    <option value="DADI">DADI</option>
+                    <option value="DADJ">DADJ</option>
+                    <option value="DADK">DADK</option>
+                    <option value="DADL">DADL</option>
+                    <option value="DADM">DADM</option>
+                    <option value="DADN">DADN</option>
+                    <option value="DADO">DADO</option>
+                    <option value="DADP">DADP</option>
+                    <option value="DADQ">DADQ</option>
+                    <option value="DADR">DADR</option>
+                    <option value="DADS">DADS</option>
+                    <option value="DADZ">DADZ</option>
+                </select>
+            </div>
+        </div>      
         
         <div class="filter-tab">
             <div class="filter-btn active" id="btn-fil-belum" onclick="setFilterKerja('belum')">Belum Lapor</div>
@@ -153,6 +185,8 @@
             </select>
         </div>
         <div class="form-group"><label>Stan Bulan Lalu (ST1)</label><input type="number" id="t-st1"></div>
+        <div class="form-group"><label>Nomor Telepon/WA (Contoh: 08123456xxx)</label><input type="text" id="t-telp" placeholder="Boleh dikosongkan"></div>
+        <div class="form-group"><label>Catatan Pelanggan</label><textarea id="t-catatan" rows="2" placeholder="Contoh: Meteran di dalam pagar / anjing galak (Boleh dikosongkan)"></textarea></div>
         <button class="btn-submit btn-green" onclick="tambahPelangganBaru()">Simpan Pelanggan Baru</button>
     </div>
 
@@ -168,6 +202,7 @@
             <p style="margin: 3px 0;" id="f-id">ID: -</p>
             <p style="margin: 3px 0;" id="f-alamat">Alamat: -</p>
             <p style="margin: 3px 0; font-weight: bold; color: #28a745;" id="f-st1">Stan Lalu (ST1): -</p>
+            <p style="margin: 3px 0; color: #d63384; font-size: 13px;" id="f-catatan">Catatan: -</p>
         </div>
 
         <div class="form-group" style="margin-top: 15px;">
@@ -195,16 +230,40 @@
             <p id="m-id">ID Pelanggan: -</p>
             <p id="m-alamat">Alamat: -</p>
             <p id="m-kode">Kode Baca: -</p>
+            <p id="m-telp">No. Telepon: -</p>
+            <p id="m-catatan" style="background:#fff3cd; padding:8px; border-radius:6px; font-size:14px; display:none;"></p>
             <p id="m-st1">Stan Bulan Lalu (ST1): -</p>
             <p id="m-st2">Stan Sekarang (ST2): -</p>
             <p id="m-pmk">Pemakaian Saat Ini: -</p>
             <p id="m-status">Status Kerja: -</p>
-            <label>Foto Bukti Meteran (Klik foto untuk zoom):</label>
-            <img id="m-foto" class="modal-foto" src="" alt="Belum ada foto" onclick="zoomFotoBesar(this.src)">
             
-            <div class="modal-buttons">
+            <div id="m-foto-container">
+                <label>Foto Bukti Meteran (Klik foto untuk zoom):</label>
+                <img id="m-foto" class="modal-foto" src="" alt="Belum ada foto" onclick="zoomFotoBesar(this.src)">
+            </div>
+            
+            <div class="modal-buttons" id="modal-default-buttons">
                 <button class="btn-submit btn-blue" onclick="setStatusTuntas()">Set Tuntas</button>
+                <button class="btn-submit btn-orange" onclick="bukaFormEdit()">✏️ Edit Data Pelanggan</button>
                 <button class="btn-submit btn-red" onclick="hapusPelangganAktif()">Hapus Pelanggan</button>
+            </div>
+
+            <div id="modal-edit-section">
+                <h4 style="margin: 0 0 10px 0; color: #fd7e14;">Edit Informasi Pelanggan</h4>
+                <div class="form-group"><label>Nama Pelanggan</label><input type="text" id="e-nama"></div>
+                <div class="form-group"><label>Alamat / Wilayah</label><input type="text" id="e-alamat"></div>
+                <div class="form-group">
+                    <label>Kode Pembacaan</label>
+                    <select id="e-kode">
+                        <option value="DADA">DADA</option>
+                        <option value="DADB">DADB</option>
+                        <option value="DADC">DADC</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Nomor Telepon / WA</label><input type="text" id="e-telp"></div>
+                <div class="form-group"><label>Catatan Khusus</label><textarea id="e-catatan" rows="2"></textarea></div>
+                <button class="btn-submit btn-green" onclick="simpanPerubahanPelanggan()">💾 Simpan Perubahan</button>
+                <button class="btn-submit btn-red" style="padding:8px; font-size:13px;" onclick="tutupFormEdit()">Batal</button>
             </div>
         </div>
     </div>
@@ -231,6 +290,22 @@
         let pelangganAktif = null;
         let filterKerjaStatus = 'belum';
 
+        // 🧠 FUNGSI FORMAT OTOMATIS NOMOR TELEPON KE SINKRONISASI WA
+        function formatNomorWhatsApp(noRaw) {
+            if(!noRaw) return "";
+            // Hapus semua karakter non-angka (seperti spasi, strip, tanda kurung)
+            let clean = noRaw.replace(/\D/g, '');
+            // Jika diawali '08', ubah jadi '628'
+            if (clean.startsWith('0')) {
+                clean = '62' + clean.slice(1);
+            }
+            // Jika tidak diawali 62 tapi langsung angka 8, tambahkan 62
+            if (clean.startsWith('8')) {
+                clean = '62' + clean;
+            }
+            return clean;
+        }
+
         async function muatData() {
             document.getElementById('loading-text').style.display = 'block';
             let { data, error } = await _supabase.from('pelanggan').select('*');
@@ -240,7 +315,7 @@
             jalankanSortDanFilter();
         }
 
-        // 🔍 FIX UTAMA: Fungsi pencarian realtime di halaman Foto WA
+        // 🔍 PENCARIAN HALAMAN FOTO WA
         function bantuCariHalamanFoto(keyword) {
             const boxHasil = document.getElementById('box-hasil-foto');
             keyword = keyword.toLowerCase().trim();
@@ -248,10 +323,10 @@
             if(keyword === '') { boxHasil.style.display = 'none'; return; }
 
             const cocok = semuaPelanggan.filter(p =>
-    (p.nama || '').toLowerCase().includes(keyword) ||
-    (p.id_pelanggan || '').toString().includes(keyword) ||
-    (p.alamat || '').toLowerCase().includes(keyword)
-).slice(0,8); // Batasi maksimal tampil 8 rekomendasi biar rapi
+                (p.nama || '').toLowerCase().includes(keyword) ||
+                (p.id_pelanggan || '').toString().includes(keyword) ||
+                (p.alamat || '').toLowerCase().includes(keyword)
+            ).slice(0, 8);
 
             if(cocok.length === 0) {
                 boxHasil.innerHTML = `<div class="search-res-item" style="color:gray;">Data tidak ditemukan, bro</div>`;
@@ -277,23 +352,26 @@
                 document.getElementById('f-id').innerText = "ID: " + p.id_pelanggan;
                 document.getElementById('f-alamat').innerText = "Alamat: " + (p.alamat || '-');
                 document.getElementById('f-st1').innerText = "Stan Lalu (ST1): " + p.st1;
+                document.getElementById('f-catatan').innerText = "Catatan: " + (p.catatan || 'Tidak ada catatan');
                 document.getElementById('st2-input').value = p.st2 !== null && p.st2 !== undefined ? p.st2 : '';
                 document.getElementById('info-pilihan-card').style.display = 'block';
             }
             document.getElementById('box-hasil-foto').style.display = 'none';
         }
 
-        // 🔍 FIX UTAMA: Fungsi pencarian di halaman daftar utama (onkeyup aktif)
+        // 🔍 SORT & FILTER DATA DAFTAR UTAMA
         function jalankanSortDanFilter() {
             let dataHasil = [...semuaPelanggan];
             const keyword = document.getElementById('search-input').value.toLowerCase().trim();
             
             if(keyword !== '') {
                 dataHasil = dataHasil.filter(p =>
-    (p.nama || '').toLowerCase().includes(keyword) ||
-    (p.id_pelanggan || '').toString().includes(keyword) ||
-    (p.alamat || '').toLowerCase().includes(keyword)
-);
+                    (p.nama || '').toLowerCase().includes(keyword) ||
+                    (p.id_pelanggan || '').toString().includes(keyword) ||
+                    (p.alamat || '').toLowerCase().includes(keyword) ||
+                    (p.catatan || '').toLowerCase().includes(keyword) ||
+                    (p.nomor_telp || '').includes(keyword)
+                );
             }
 
             const kodeFilter = document.getElementById('filter-kode-select').value;
@@ -304,7 +382,7 @@
             const jenisSort = document.getElementById('sort-select').value;
             dataHasil.sort((a, b) => {
                 if (jenisSort === 'nama') return a.nama.localeCompare(b.nama);
-                if (jenisSort === 'id_pelanggan') return a.id_pelanggan.localeCompare(b.id_pelanggan);
+                if (jenisSort === 'id_pelanggan') return String(a.id_pelanggan).localeCompare(String(b.id_pelanggan));
                 if (jenisSort === 'kode_baca') return (a.kode_baca || '').localeCompare(b.kode_baca || '');
             });
 
@@ -320,16 +398,28 @@
             dataArray.forEach(p => {
                 let stat = p.status_kerja || 'belum';
                 let lbl = stat === 'belum' ? 'Belum Lapor' : (stat === 'sudah_kirim' ? 'WA Masuk' : 'Set Tuntas');
+                let infoCatatan = p.catatan ? `<div style="font-size:12px; color:#b91c1c; font-style:italic;">📝 ${p.catatan}</div>` : '';
+                
                 container.innerHTML += `
-                    <div class="pelanggan-item" onclick='bukaModalDetail(${JSON.stringify(p)})'>
+                    <div class="pelanggan-item" onclick="bukaModalDetailById('${p.id_pelanggan}')">
                         <span class="badge-status ${stat}">${lbl}</span>
                         <div class="pelanggan-title">${p.nama}</div>
                         <div style="font-size:13px; color:#495057;">📍 ${p.alamat || '-'}</div>
+                        ${infoCatatan}
                         <div class="pelanggan-meta">
                             <span><b>ID:</b> ${p.id_pelanggan}</span> <span><b>KODE:</b> ${p.kode_baca || 'DADA'}</span> <span><b>ST1:</b> ${p.st1}</span> <span><b>ST2:</b> ${p.st2 !== null && p.st2 !== undefined ? p.st2 : '--'}</span>
                         </div>
                     </div>`;
             });
+        }
+
+        function bukaModalDetailById(id) {
+            const p = semuaPelanggan.find(
+                item => String(item.id_pelanggan) === String(id)
+            );
+            if (p) {
+                bukaModalDetail(p);
+            }
         }
 
         function renderProgresList() {
@@ -345,54 +435,34 @@
             document.getElementById('btn-fil-tuntas').innerText = `Set Tuntas (${countDibaca})`;
 
             let terfilter = semuaPelanggan.filter(p => (p.status_kerja || 'belum') === filterKerjaStatus);
-            // SEARCH
-const keyword = document.getElementById('search-progres').value
-    .toLowerCase()
-    .trim();
+            
+            const keyword = document.getElementById('search-progres').value.toLowerCase().trim();
+            if (keyword !== '') {
+                terfilter = terfilter.filter(p =>
+                    (p.nama || '').toLowerCase().includes(keyword) ||
+                    (p.id_pelanggan || '').toString().includes(keyword) ||
+                    (p.alamat || '').toLowerCase().includes(keyword)
+                );
+            }
 
-if (keyword !== '') {
-    terfilter = terfilter.filter(p =>
-        (p.nama || '').toLowerCase().includes(keyword) ||
-        (p.id_pelanggan || '').toString().includes(keyword) ||
-        (p.alamat || '').toLowerCase().includes(keyword)
-    );
-}
+            const kode = document.getElementById('filter-kode-progres').value;
+            if (kode !== 'semua') {
+                terfilter = terfilter.filter(p => (p.kode_baca || '') === kode);
+            }
 
-// FILTER KODE
-const kode = document.getElementById('filter-kode-progres').value;
+            const jenisSort = document.getElementById('sort-progres').value;
+            terfilter.sort((a, b) => {
+                if (jenisSort === 'nama') return (a.nama || '').localeCompare(b.nama || '');
+                if (jenisSort === 'id_pelanggan') return String(a.id_pelanggan || '').localeCompare(String(b.id_pelanggan || ''));
+                if (jenisSort === 'kode_baca') return (a.kode_baca || '').localeCompare(b.kode_baca || '');
+                return 0;
+            });
 
-if (kode !== 'semua') {
-    terfilter = terfilter.filter(
-        p => (p.kode_baca || '') === kode
-    );
-}
-
-// SORT
-const jenisSort = document.getElementById('sort-progres').value;
-
-terfilter.sort((a, b) => {
-
-    if (jenisSort === 'nama') {
-        return (a.nama || '').localeCompare(b.nama || '');
-    }
-
-    if (jenisSort === 'id_pelanggan') {
-        return String(a.id_pelanggan || '')
-            .localeCompare(String(b.id_pelanggan || ''));
-    }
-
-    if (jenisSort === 'kode_baca') {
-        return (a.kode_baca || '')
-            .localeCompare(b.kode_baca || '');
-    }
-
-    return 0;
-});
             if(terfilter.length === 0) { container.innerHTML = '<p style="text-align:center;color:gray;padding:20px;">Kosong di bagian ini, bro!</p>'; return; }
 
             terfilter.forEach(p => {
                 container.innerHTML += ` 
-                    <div class="pelanggan-item" onclick='bukaModalDetail(${JSON.stringify(p)})'> 
+                    <div class="pelanggan-item" onclick="bukaModalDetailById('${p.id_pelanggan}')"> 
                         <div class="pelanggan-title">${p.nama}</div> 
                         <div class="pelanggan-meta"><span><b>ID:</b> ${p.id_pelanggan}</span> <span><b>Alamat:</b> ${p.alamat || '-'}</span></div> 
                     </div>`;
@@ -409,10 +479,31 @@ terfilter.sort((a, b) => {
 
         function bukaModalDetail(p) {
             pelangganAktif = p;
+            tutupFormEdit(); // Pastikan form edit tertutup dulu tiap buka data baru
+            
             document.getElementById('m-nama').innerText = p.nama;
             document.getElementById('m-id').innerText = "ID Pelanggan: " + p.id_pelanggan;
             document.getElementById('m-alamat').innerText = "Alamat: " + (p.alamat || '-');
             document.getElementById('m-kode').innerText = "Kode Baca: " + (p.kode_baca || 'DADA');
+            
+            // Konfigurasi Link Klik To Chat WhatsApp
+            const telpEl = document.getElementById('m-telp');
+            if(p.nomor_telp) {
+                let textWA = encodeURIComponent(`Halo Bpk/Ibu ${p.nama}, kami petugas PDAM menginfokan stan meteran bulan ini.`);
+                telpEl.innerHTML = `No. Telepon: <a class="wa-link" href="https://wa.me/${p.nomor_telp}?text=${textWA}" target="_blank">🟢 +${p.nomor_telp} (Klik untuk Chat)</a>`;
+            } else {
+                telpEl.innerText = "No. Telepon: Tidak ada data";
+            }
+
+            // Box Catatan Khusus
+            const catEl = document.getElementById('m-catatan');
+            if(p.catatan) {
+                catEl.innerHTML = `<b>📌 Catatan Petugas:</b> ${p.catatan}`;
+                catEl.style.display = 'block';
+            } else {
+                catEl.style.display = 'none';
+            }
+
             document.getElementById('m-st1').innerText = "Stan Bulan Lalu (ST1): " + p.st1;
             document.getElementById('m-st2').innerText = "Stan Sekarang (ST2): " + (p.st2 !== null && p.st2 !== undefined ? p.st2 : '--');
             document.getElementById('m-pmk').innerText = "Pemakaian Saat Ini: " + (p.pmk1 !== null && p.pmk1 !== undefined ? p.pmk1 : '0') + " m³";
@@ -421,13 +512,69 @@ terfilter.sort((a, b) => {
             document.getElementById('m-status').innerText = "Status Kerja: " + (st === 'belum' ? 'Belum Lapor' : (st === 'sudah_kirim' ? 'WA Masuk' : 'Set Tuntas'));
             
             const imgEl = document.getElementById('m-foto');
-            if(p.foto_url) { imgEl.src = p.foto_url; imgEl.style.display = 'block'; } else { imgEl.style.display = 'none'; }
+            if(p.foto_url) { 
+                imgEl.src = p.foto_url; 
+                document.getElementById('m-foto-container').style.display = 'block'; 
+            } else { 
+                document.getElementById('m-foto-container').style.display = 'none'; 
+            }
 
             document.getElementById('detail-modal').style.display = 'block';
         }
 
         function tutupModal() { document.getElementById('detail-modal').style.display = 'none'; }
         function zoomFotoBesar(src) { document.getElementById('zoom-img').src = src; document.getElementById('zoom-overlay').style.display = 'flex'; }
+
+        // ✏️ LOGIKA EDIT DATA PELANGGAN BISA DIKLIK LANGSUNG DI MODAL
+        function bukaFormEdit() {
+            if(!pelangganAktif) return;
+            document.getElementById('e-nama').value = pelangganAktif.nama || '';
+            document.getElementById('e-alamat').value = pelangganAktif.alamat || '';
+            document.getElementById('e-kode').value = pelangganAktif.kode_baca || 'DADA';
+            document.getElementById('e-telp').value = pelangganAktif.nomor_telp || '';
+            document.getElementById('e-catatan').value = pelangganAktif.catatan || '';
+            
+            document.getElementById('modal-default-buttons').style.display = 'none';
+            document.getElementById('modal-edit-section').style.display = 'block';
+        }
+
+        function tutupFormEdit() {
+            document.getElementById('modal-default-buttons').style.display = 'flex';
+            document.getElementById('modal-edit-section').style.display = 'none';
+        }
+
+        async function simpanPerubahanPelanggan() {
+            if(!pelangganAktif) return;
+            
+            const namaBaru = document.getElementById('e-nama').value.trim();
+            const alamatBaru = document.getElementById('e-alamat').value.trim();
+            const kodeBaru = document.getElementById('e-kode').value;
+            const telpRaw = document.getElementById('e-telp').value.trim();
+            const catatanBaru = document.getElementById('e-catatan').value.trim();
+
+            if(!namaBaru) { alert('Nama pelanggan tidak boleh kosong, bro!'); return; }
+
+            const telpTerformat = formatNomorWhatsApp(telpRaw);
+
+            let { error } = await _supabase.from('pelanggan')
+                .update({ 
+                    nama: namaBaru, 
+                    alamat: alamatBaru, 
+                    kode_baca: kodeBaru, 
+                    nomor_telp: telpTerformat, 
+                    catatan: catatanBaru 
+                })
+                .eq('id_pelanggan', pelangganAktif.id_pelanggan);
+
+            if(error) { 
+                alert('Gagal update data: ' + error.message); 
+            } else { 
+                alert('✅ Data pelanggan berhasil diperbarui!');
+                tutupFormEdit();
+                tutupModal();
+                muatData();
+            }
+        }
 
         async function setStatusTuntas() {
             if(!pelangganAktif) return;
@@ -474,10 +621,15 @@ terfilter.sort((a, b) => {
         async function simpanKeSupabase() {
             if(!pelangganAktif) { alert('Pilih pelanggannya dulu, bro!'); return; }
             
+            // 🐛 FIX SINTAKS: Menangkap value input dengan benar dari element ID
             const st2InputRaw = document.getElementById('st2-input').value;
-            if (st2InputRaw === '') { alert('Kolom Stan Sekarang (ST2) harus diisi angka!'); return; }
-            
             const st2 = parseInt(st2InputRaw);
+
+            if (isNaN(st2)) { 
+                alert('Stan Sekarang (ST2) harus berupa angka murni, bro! Periksa kembali ketikanmu.'); 
+                return; 
+            }
+
             if (!fileBlobWebP) { alert('Foto meteran wajib di-upload!'); return; }
 
             const btn = document.getElementById('btn-simpan-stan');
@@ -509,12 +661,32 @@ terfilter.sort((a, b) => {
         async function resetMulaiBulanBaru() {
             let konfirmasi1 = confirm("⚠️ PERINGATAN KERAS!\nApakah kamu mau mereset data untuk periode bulan baru?");
             if(!konfirmasi1) return;
-            let konfirmasi2 = confirm("Data foto lama di database akan dibersihkan, dan Stan Sekarang (ST2) saat ini akan dijadikan dasar Stan Lalu (ST1) untuk bulan depan. Lanjutkan?");
+            let konfirmasi2 = confirm("Data FOTO LAMA di Storage dan Database akan DIHAPUS PERMANEN. Stan Sekarang (ST2) saat ini akan dijadikan dasar Stan Lalu (ST1) untuk bulan depan. Lanjutkan?");
             if(!konfirmasi2) return;
 
-            document.getElementById('loading-text').innerText = "Sedang memproses reset massal...";
+            document.getElementById('loading-text').innerText = "Sedang membersihkan foto dan mereset data...";
             document.getElementById('loading-text').style.display = 'block';
 
+            const fileYangAkanDihapus = [];
+            semuaPelanggan.forEach(p => {
+                if (p.foto_url) {
+                    const namaFile = p.foto_url.split('/').pop();
+                    if (namaFile) fileYangAkanDihapus.push(namaFile);
+                }
+            });
+
+            if (fileYangAkanDihapus.length > 0) {
+                let { error: storageDelError } = await _supabase.storage
+                    .from('foto-pdam')
+                    .remove(fileYangAkanDihapus);
+                    
+                if (storageDelError) {
+                    console.log("Catatan: Ada kendala hapus beberapa foto di storage: ", storageDelError.message);
+                }
+            }
+
+            // 🔥 DISINI AMAN, BRO: update hanya mereset st1, st2, pmk1, foto_url, status_kerja. 
+            // Kolom catatan dan nomor_telp sengaja tidak disertakan agar tetap awet di database.
             for(let p of semuaPelanggan) {
                 let stanLaluBaru = p.st2 !== null && p.st2 !== undefined ? p.st2 : p.st1; 
                 await _supabase.from('pelanggan')
@@ -522,7 +694,7 @@ terfilter.sort((a, b) => {
                     .eq('id_pelanggan', p.id_pelanggan);
             }
 
-            alert('🔄 Sistem berhasil direset untuk bulan baru!');
+            alert('🔄 Sistem berhasil dibersihkan total dan siap untuk bulan baru!');
             muatData();
         }
 
@@ -532,11 +704,37 @@ terfilter.sort((a, b) => {
             const alamat = document.getElementById('t-alamat').value;
             const kode = document.getElementById('t-kode').value;
             const st1 = parseInt(document.getElementById('t-st1').value);
+            const telpRaw = document.getElementById('t-telp').value.trim();
+            const catatan = document.getElementById('t-catatan').value.trim();
 
             if(!id || !nama || isNaN(st1)) { alert('Mohon isi semua data kolom dengan benar!'); return; }
-            let { error } = await _supabase.from('pelanggan').insert([{ id_pelanggan: id, nama: nama, alamat: alamat, kode_baca: kode, st1: st1, status_kerja: 'belum' }]);
+            
+            // Format nomor telepon sebelum disimpan pertama kali
+            const nomorTerformat = formatNomorWhatsApp(telpRaw);
+
+            let { error } = await _supabase.from('pelanggan').insert([{ 
+                id_pelanggan: id, 
+                nama: nama, 
+                alamat: alamat, 
+                kode_baca: kode, 
+                st1: st1, 
+                status_kerja: 'belum',
+                nomor_telp: nomorTerformat,
+                catatan: catatan
+            }]);
+            
             if (error) alert(error.message);
-            else { alert('✅ Sukses terdaftar!'); muatData(); switchPage('daftar', 'Semua Pelanggan', document.querySelectorAll('.nav-item')[0]); }
+            else { 
+                alert('✅ Sukses terdaftar!'); 
+                document.getElementById('t-id').value = '';
+                document.getElementById('t-nama').value = '';
+                document.getElementById('t-alamat').value = '';
+                document.getElementById('t-st1').value = '';
+                document.getElementById('t-telp').value = '';
+                document.getElementById('t-catatan').value = '';
+                muatData(); 
+                switchPage('daftar', 'Semua Pelanggan', document.querySelectorAll('.nav-item')[0]); 
+            }
         }
 
         function switchPage(pageId, pageTitle, element) {
@@ -545,7 +743,6 @@ terfilter.sort((a, b) => {
             document.getElementById('page-' + pageId).classList.add('active');
             element.classList.add('active');
             if(pageId !== 'daftar') { document.getElementById('app-title').innerText = pageTitle; } else { document.getElementById('app-title').innerText = `Data Pelanggan (${semuaPelanggan.length})`; }
-            // Sembunyikan pop-up cari foto kalau pindah page
             document.getElementById('box-hasil-foto').style.display = 'none';
         }
 
